@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browser Test</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+
+  :root{
+    --bg:#080a10;
+    --panel:rgba(255,255,255,.035);
+    --panel-2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.09);
+    --text:#e8ecf4;
+    --muted:#8791a6;
+    --ok:#37d99a;
+    --fail:#ff5f6d;
+    --accent:#6c8cff;
+    --accent-2:#b06bff;
+    --radius:16px;
+  }
+
+  html,body{margin:0;padding:0}
+
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1000px 620px at 10% -12%, rgba(108,140,255,.20), transparent 60%),
+      radial-gradient(900px 520px at 96% -4%, rgba(176,107,255,.16), transparent 55%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    padding:clamp(18px,4vw,52px) clamp(12px,3vw,32px) 90px;
+  }
+
+  .wrap{max-width:1120px;margin:0 auto}
+
+  /* ---------- Cabecera ---------- */
+  .hero{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    align-items:center;
+    justify-content:space-between;
+    padding:26px clamp(18px,3vw,34px);
+    border:1px solid var(--border);
+    border-radius:calc(var(--radius) + 6px);
+    background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    box-shadow:0 30px 70px -40px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .hero-text{flex:1 1 320px;min-width:260px}
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--accent);
+    background:rgba(108,140,255,.12);
+    border:1px solid rgba(108,140,255,.28);
+    padding:5px 11px;
+    border-radius:100px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--ok);
+    box-shadow:0 0 10px var(--ok);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{opacity:.35}}
+
+  h1{
+    margin:0 0 8px;
+    font-size:clamp(30px,5.2vw,46px);
+    line-height:1.05;
+    letter-spacing:-.03em;
+    font-weight:800;
+    background:linear-gradient(100deg,#fff 10%,#9fb4ff 45%,#c79cff 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .hero p{margin:0;color:var(--muted);max-width:52ch;font-size:14.5px}
+
+  /* ---------- Anillo de puntuación ---------- */
+  .score{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+
+  .ring{
+    --p:0;
+    --ring-size:132px;
+    width:var(--ring-size);
+    height:var(--ring-size);
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:conic-gradient(
+      var(--ok) calc(var(--p) * 1%),
+      rgba(255,255,255,.07) calc(var(--p) * 1%)
+    );
+    transition:background .5s ease;
+    position:relative;
+    flex:0 0 auto;
+  }
+  .ring::after{
+    content:"";
+    position:absolute;inset:-8px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(55,217,154,.22), transparent 65%);
+    opacity:.85;
+    z-index:-1;
+    filter:blur(12px);
+  }
+  .ring-inner{
+    width:calc(var(--ring-size) - 22px);
+    height:calc(var(--ring-size) - 22px);
+    border-radius:50%;
+    background:#0c0f17;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    line-height:1.1;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .ring-inner b{
+    display:block;
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-.02em;
+  }
+  .ring-inner span{
+    display:block;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-top:3px;
+    font-weight:600;
+  }
+
+  .score-meta{font-size:13.5px;color:var(--muted);min-width:150px}
+  .score-meta b{color:var(--text);font-weight:700}
+  .score-meta .ok-n{color:var(--ok);font-weight:700}
+  .score-meta .fail-n{color:var(--fail);font-weight:700}
+
+  /* ---------- Tarjetas de entorno ---------- */
+  .env{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-top:22px;
+  }
+  .env-card{
+    border:1px solid var(--border);
+    background:var(--panel);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    transition:background .2s, border-color .2s, transform .2s;
+  }
+  .env-card:hover{background:var(--panel-2);border-color:rgba(255,255,255,.16);transform:translateY(-2px)}
+  .env-card .k{
+    font-size:10.5px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:700;
+    margin-bottom:5px;
+  }
+  .env-card .v{
+    font-size:14.5px;
+    font-weight:600;
+    word-break:break-word;
+  }
+
+  /* ---------- Barra de herramientas ---------- */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin:30px 0 18px;
+  }
+
+  .filter,.btn{
+    appearance:none;
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--text);
+    font:inherit;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 15px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:background .18s, border-color .18s, color .18s, transform .12s;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+  }
+  .filter:hover,.btn:hover{background:var(--panel-2);border-color:rgba(255,255,255,.2)}
+  .filter:active,.btn:active{transform:scale(.97)}
+
+  .filter.active{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 8px 24px -12px var(--accent);
+  }
+
+  .btn.primary{
+    margin-left:auto;
+    background:linear-gradient(135deg,rgba(108,140,255,.22),rgba(176,107,255,.22));
+    border-color:rgba(108,140,255,.4);
+  }
+  .btn.primary:hover{background:linear-gradient(135deg,rgba(108,140,255,.34),rgba(176,107,255,.34))}
+
+  /* ---------- Suites ---------- */
+  .suite{margin-bottom:26px}
+
+  .suite-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:0 0 12px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .suite-head h2{
+    margin:0;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .suite-icon{font-size:17px;line-height:1}
+  .suite-count{
+    margin-left:auto;
+    font-size:12px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    color:var(--muted);
+    background:var(--panel);
+    border:1px solid var(--border);
+    padding:3px 11px;
+    border-radius:100px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(228px,1fr));
+    gap:8px;
+  }
+
+  .test{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 13px;
+    border-radius:11px;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.055);
+    font-size:13.2px;
+    cursor:default;
+    transition:background .16s, border-color .16s, transform .16s;
+    animation:pop .32s cubic-bezier(.2,.8,.3,1) backwards;
+    animation-delay:calc(var(--i) * 5ms);
+  }
+  @keyframes pop{
+    from{opacity:0;transform:translateY(6px) scale(.97)}
+    to{opacity:1;transform:none}
+  }
+  .test:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.13);transform:translateX(2px)}
+
+  .dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    flex:0 0 auto;
+    position:relative;
+  }
+  .test.pass .dot{
+    background:var(--ok);
+    box-shadow:0 0 0 3px rgba(55,217,154,.14), 0 0 12px rgba(55,217,154,.55);
+  }
+  .test.fail .dot{
+    background:var(--fail);
+    box-shadow:0 0 0 3px rgba(255,95,109,.14), 0 0 12px rgba(255,95,109,.5);
+  }
+
+  .test .name{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .test.fail .name{color:#ffb3ba}
+
+  /* ---------- Pie ---------- */
+  .footer{
+    margin-top:46px;
+    padding-top:22px;
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    font-size:12.5px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 20px;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .footer code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11.5px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    padding:2px 7px;
+    border-radius:6px;
+    color:#b9c4dd;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translate(-50%,140%);
+    background:#121722;
+    border:1px solid rgba(108,140,255,.4);
+    color:var(--text);
+    padding:11px 20px;
+    border-radius:100px;
+    font-size:13px;
+    font-weight:600;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,.9);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1);
+    z-index:99;
+    pointer-events:none;
+  }
+  .toast.show{transform:translate(-50%,0)}
+
+  @media (max-width:620px){
+    .hero{padding:22px 18px}
+    .score{width:100%;justify-content:flex-start}
+    .btn.primary{margin-left:0;width:100%;justify-content:center}
+    .grid{grid-template-columns:1fr}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">Diagnóstico en vivo</span>
+      <h1>Browser Test</h1>
+      <p>Comprobación de compatibilidad por características. Se ejecuta al 100% en tu dispositivo: nada se envía a ningún servidor.</p>
+    </div>
+
+    <div class="score">
+      <div class="ring" id="ring">
+        <div class="ring-inner">
+          <div>
+            <b id="scoreNum">0%</b>
+            <span>soportado</span>
+          </div>
+        </div>
+      </div>
+      <div class="score-meta" id="scoreMeta">
+        Analizando…
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ ENTORNO ============ -->
+  <section class="env" id="env"></section>
+
+  <!-- ============ TOOLBAR ============ -->
+  <div class="toolbar">
+    <button class="filter active" data-filter="all">Todas</button>
+    <button class="filter" data-filter="pass">Soportadas</button>
+    <button class="filter" data-filter="fail">No soportadas</button>
+    <button class="btn primary" id="rerun">↻ Re-ejecutar</button>
+    <button class="btn" id="copy">⧉ Copiar informe</button>
+  </div>
+
+  <!-- ============ RESULTADOS ============ -->
+  <main id="results"></main>
+
+  <footer class="footer">
+    <span>Browser Test · detección por características, nunca por <code>userAgent</code>.</span>
+    <span id="stamp"></span>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Informe copiado</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     UTILIDADES DE DETECCIÓN
+     ========================================================= */
+
+  const UA = navigator.userAgent;
+
+  /** CSS.supports seguro */
+  function cssSupports(prop, value) {
+    try {
+      if (!window.CSS || typeof CSS.supports !== "function") return false;
+      return value === undefined ? CSS.supports(prop) : CSS.supports(prop, value);
+    } catch (e) { return false; }
+  }
+
+  /** CSS.supports con selector */
+  function cssSelector(sel) {
+    try {
+      if (!window.CSS || typeof CSS.supports !== "function") return false;
+      return CSS.supports("selector(" + sel + ")");
+    } catch (e) { return false; }
+  }
+
+  /** Evalúa una expresión JS moderna sin romper el script principal */
+  function jsExpr(expr) {
+    try { return !!new Function("return (" + expr + ");")(); }
+    catch (e) { return false; }
+  }
+
+  /** Comprueba que un fragmento de código se pueda parsear/ejecutar */
+  function jsCode(code) {
+    try { new Function(code)(); return true; }
+    catch (e) { return false; }
+  }
+
+  /** ¿Existe la propiedad en algún sitio de la cadena? */
+  const has = (obj, path) => {
+    try {
+      return path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), obj) !== undefined;
+    } catch (e) { return false; }
+  };
+
+  /** Test de anidamiento CSS real (no hay CSS.supports para esto) */
+  function testNesting() {
+    try {
+      const s = document.createElement("style");
+      s.textContent = "#__bt_nest{color:red;& > b{color:blue}}";
+      document.head.appendChild(s);
+      const rule = s.sheet && s.sheet.cssRules && s.sheet.cssRules[0];
+      const ok = !!(rule && rule.cssRules && rule.cssRules.length === 1);
+      s.remove();
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  /** Test de @layer mediante CSSOM */
+  function testLayer() {
+    try {
+      const s = document.createElement("style");
+      s.textContent = "@layer btA, btB;";
+      document.head.appendChild(s);
+      const ok = s.sheet && s.sheet.cssRules.length >= 1;
+      s.remove();
+      return ok && typeof window.CSSLayerBlockRule !== "undefined";
+    } catch (e) { return false; }
+  }
+
+  /* =========================================================
+     SUITE 1 — CSS
+     ========================================================= */
+  const CSS_TESTS = [
+    ["Flexbox",               () => cssSupports("display", "flex")],
+    ["CSS Grid",              () => cssSupports("display", "grid")],
+    ["Subgrid",               () => cssSupports("grid-template-columns", "subgrid")],
+    ["Variables CSS",         () => cssSupports("(--bt: 1)")],
+    ["gap en Flexbox",        () => cssSupports("gap", "1rem")],
+    [":is() / :where()",      () => cssSelector(":is(a)") && cssSelector(":where(a)")],
+    [":has()",                () => cssSelector(":has(a)")],
+    [":focus-visible",        () => cssSelector(":focus-visible")],
+    [":user-valid",           () => cssSelector(":user-valid")],
+    [":nth-child(An+B of S)", () => cssSelector(":nth-child(1 of a)")],
+    ["Anidamiento CSS",       testNesting],
+    ["@layer",                testLayer],
+    ["@supports",             () => typeof window.CSSSupportsRule !== "undefined"],
+    ["@property",             () => typeof window.CSSPropertyRule !== "undefined"],
+    ["@container",            () => typeof window.CSSContainerRule !== "undefined" && cssSupports("container-type", "inline-size")],
+    ["@scope",                () => typeof window.CSSScopeRule !== "undefined"],
+    ["Container Queries",     () => cssSupports("container-type", "inline-size")],
+    ["aspect-ratio",          () => cssSupports("aspect-ratio", "1 / 1")],
+    ["clamp()",               () => cssSupports("width", "clamp(1px, 2vw, 3px)")],
+    ["min() / max()",         () => cssSupports("width", "min(1px,2px)") && cssSupports("width", "max(1px,2px)")],
+    ["calc()",                () => cssSupports("width", "calc(1px + 1px)")],
+    ["color-mix()",           () => cssSupports("color", "color-mix(in srgb, red, blue)")],
+    ["oklch() / oklab()",     () => cssSupports("color", "oklch(60% .15 200)")],
+    ["light-dark()",          () => cssSupports("color", "light-dark(red, blue)")],
+    ["Gradientes cónicos",    () => cssSupports("background-image", "conic-gradient(red, blue)")],
+    ["backdrop-filter",       () => cssSupports("backdrop-filter", "blur(4px)") || cssSupports("-webkit-backdrop-filter", "blur(4px)")],
+    ["filter",                () => cssSupports("filter", "blur(1px)")],
+    ["mix-blend-mode",        () => cssSupports("mix-blend-mode", "multiply")],
+    ["clip-path",             () => cssSupports("clip-path", "circle(50%)")],
+    ["mask",                  () => cssSupports("mask", "linear-gradient(#000,#000)") || cssSupports("-webkit-mask", "linear-gradient(#000,#000)")],
+    ["object-fit",            () => cssSupports("object-fit", "cover")],
+    ["position: sticky",      () => cssSupports("position", "sticky")],
+    ["scroll-behavior",       () => cssSupports("scroll-behavior", "smooth")],
+    ["scroll-snap",           () => cssSupports("scroll-snap-type", "x mandatory")],
+    ["scrollbar-gutter",      () => cssSupports("scrollbar-gutter", "stable")],
+    ["overscroll-behavior",   () => cssSupports("overscroll-behavior", "contain")],
+    ["touch-action",          () => cssSupports("touch-action", "none")],
+    ["content-visibility",    () => cssSupports("content-visibility", "auto")],
+    ["contain",               () => cssSupports("contain", "layout")],
+    ["Unidades dvh/svh/lvh",  () => cssSupports("height", "100dvh") && cssSupports("height", "100svh")],
+    ["Propiedades lógicas",   () => cssSupports("margin-inline", "1px") && cssSupports("inset-block-start", "0")],
+    ["writing-mode",          () => cssSupports("writing-mode", "vertical-rl")],
+    ["accent-color",          () => cssSupports("accent-color", "red")],
+    ["text-wrap: balance",    () => cssSupports("text-wrap", "balance")],
+    ["Pseudo ::marker",       () => cssSelector("::marker")],
+    ["Pseudo ::backdrop",     () => cssSelector("::backdrop")],
+    ["Pseudo ::selection",    () => cssSelector("::selection")],
+    ["Pseudo ::file-selector",() => cssSelector("::file-selector-button")],
+    ["View Transitions CSS",  () => cssSelector("::view-transition")],
+    ["@keyframes",            () => typeof window.CSSKeyframesRule !== "undefined"],
+    ["Transiciones",          () => typeof window.CSSTransition !== "undefined"],
+    ["prefers-color-scheme",  () => !!window.matchMedia],
+    ["prefers-reduced-motion",() => !!window.matchMedia],
+    ["Gamut P3",              () => cssSupports("color", "color(display-p3 1 0 0)")]
+  ];
+
+  /* =========================================================
+     SUITE 2 — JAVASCRIPT
+     ========================================================= */
+  const JS_TESTS = [
+    ["let / const",            () => jsCode("let a=1; const b=2; if(a+b!==3) throw 0;")],
+    ["Arrow functions",        () => jsExpr("(()=>1)() === 1")],
+    ["Clases ES6",             () => jsCode("class A{constructor(){this.x=1}} if(new A().x!==1) throw 0;")],
+    ["Herencia de clases",     () => jsCode("class A{}; class B extends A{}; if(!(new B() instanceof A)) throw 0;")],
+    ["Campos privados #",      () => jsCode("class A{#x=7; get v(){return this.#x}} if(new A().v!==7) throw 0;")],
+    ["Bloques static {}",      () => jsCode("class A{static x; static{this.x=5}} if(A.x!==5) throw 0;")],
+    ["Módulos ES",             () => !("noModule" in HTMLScriptElement.prototype)],
+    ["Optional chaining ?.",   () => jsExpr("({})?.a === undefined")],
+    ["Nullish coalescing ??",  () => jsExpr("(null ?? 3) === 3")],
+    ["Asignación lógica ||=",  () => jsExpr("(()=>{let a=null; a ??= 5; return a===5})()")],
+    ["BigInt",                 () => jsExpr("typeof 1n === 'bigint'")],
+    ["Separadores numéricos",  () => jsExpr("1_000_000 === 1000000")],
+    ["Template literals",      () => jsCode("const x=2; if(`a${x}b`!=='a2b') throw 0;")],
+    ["Desestructuración",      () => jsCode("const {a}={a:1}; if(a!==1) throw 0;")],
+    ["Spread de objetos",      () => jsExpr("({...{a:1}}).a === 1")],
+    ["Rest / spread",          () => jsCode("const f=(...n)=>n.length; if(f(1,2,3)!==3) throw 0;")],
+    ["Parámetros por defecto", () => jsCode("const f=(a=4)=>a; if(f()!==4) throw 0;")],
+    ["Generadores",            () => jsCode("function* g(){yield 1} if(g().next().value!==1) throw 0;")],
+    ["Iteradores / Symbol",    () => jsExpr("typeof [][Symbol.iterator] === 'function'")],
+    ["Map / Set",              () => jsCode("const m=new Map([[1,2]]); if(m.get(1)!==2) throw 0;")],
+    ["WeakMap / WeakRef",      () => jsExpr("typeof WeakMap==='function' && typeof WeakRef==='function'")],
+    ["Proxy / Reflect",        () => jsExpr("typeof Proxy==='function' && typeof Reflect==='object'")],
+    ["Async / await",          () => jsExpr("(async()=>1)() instanceof Promise")],
+    ["Promise.allSettled",     () => jsExpr("typeof Promise.allSettled === 'function'")],
+    ["Promise.any",            () => jsExpr("typeof Promise.any === 'function'")],
+    ["queueMicrotask",         () => jsExpr("typeof queueMicrotask === 'function'")],
+    ["Array.from / of",        () => jsExpr("Array.from('ab').length===2 && Array.of(1).length===1")],
+    ["Array.flat / flatMap",   () => jsExpr("[1,[2]].flat().length===2 && typeof [].flatMap==='function'")],
+    ["Array.at()",             () => jsExpr("[1,2,3].at(-1) === 3")],
+    ["Array.findLast()",       () => jsExpr("typeof [].findLast === 'function'")],
+    ["Array.toSorted()",       () => jsExpr("typeof [].toSorted === 'function'")],
+    ["Object.entries/values",  () => jsExpr("Object.entries({a:1}).length===1")],
+    ["Object.fromEntries",     () => jsExpr("Object.fromEntries([['a',1]]).a===1")],
+    ["Object.hasOwn",          () => jsExpr("typeof Object.hasOwn === 'function'")],
+    ["Object.groupBy",         () => jsExpr("typeof Object.groupBy === 'function'")],
+    ["String.replaceAll",      () => jsExpr("'aa'.replaceAll('a','b')==='bb'")],
+    ["String.matchAll",        () => jsExpr("typeof ''.matchAll === 'function'")],
+    ["String.padStart",        () => jsExpr("'1'.padStart(3,'0')==='001'")],
+    ["structuredClone",        () => jsExpr("typeof structuredClone === 'function'")],
+    ["globalThis",             () => jsExpr("typeof globalThis === 'object'")],
+    ["Error con cause",        () => jsExpr("new Error('x',{cause:1}).cause === 1")],
+    ["RegExp grupos nombrados",() => jsExpr("/(?<y>x)/.exec('x').groups.y === 'x'")],
+    ["RegExp lookbehind",      () => jsExpr("/(?<=a)b/.test('ab')")],
+    ["RegExp \\p{...} unicode",() => jsExpr("/\\p{L}/u.test('a')")],
+    ["Intl.RelativeTimeFormat",() => jsExpr("typeof Intl.RelativeTimeFormat === 'function'")],
+    ["Intl.Segmenter",         () => jsExpr("typeof Intl.Segmenter === 'function'")],
+    ["Intl.DisplayNames",      () => jsExpr("typeof Intl.DisplayNames === 'function'")],
+    ["Intl.ListFormat",        () => jsExpr("typeof Intl.ListFormat === 'function'")],
+    ["Intl.NumberFormat v3",   () => jsExpr("new Intl.NumberFormat('es',{notation:'compact'}).format(1500).length>0")],
+    ["Temporal (propuesta)",   () => jsExpr("typeof Temporal === 'object'")]
+  ];
+
+  /* =========================================================
+     SUITE 3 — APIs DEL NAVEGADOR
+     ========================================================= */
+  const API_TESTS = [
+    ["fetch()",                () => has(window, "fetch")],
+    ["AbortController",        () => has(window, "AbortController")],
+    ["FormData",               () => has(window, "FormData")],
+    ["URL / URLSearchParams",  () => has(window, "URL") && has(window, "URLSearchParams")],
+    ["XMLHttpRequest",         () => has(window, "XMLHttpRequest")],
+    ["WebSocket",              () => has(window, "WebSocket")],
+    ["EventSource (SSE)",      () => has(window, "EventSource")],
+    ["BroadcastChannel",       () => has(window, "BroadcastChannel")],
+    ["MessageChannel",         () => has(window, "MessageChannel")],
+    ["Web Workers",            () => has(window, "Worker")],
+    ["Service Worker",         () => has(navigator, "serviceWorker")],
+    ["Cache API",              () => has(window, "caches")],
+    ["localStorage",           () => { try { localStorage.setItem("__bt", "1"); localStorage.removeItem("__bt"); return true; } catch (e) { return false; } }],
+    ["sessionStorage",         () => { try { sessionStorage.setItem("__bt", "1"); sessionStorage.removeItem("__bt"); return true; } catch (e) { return false; } }],
+    ["IndexedDB",              () => has(window, "indexedDB")],
+    ["Canvas 2D",              () => { try { return !!document.createElement("canvas").getContext("2d"); } catch (e) { return false; } }],
+    ["WebGL",                  () => { try { return !!document.createElement("canvas").getContext("webgl"); } catch (e) { return false; } }],
+    ["WebGL 2",                () => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch (e) { return false; } }],
+    ["OffscreenCanvas",        () => has(window, "OffscreenCanvas")],
+    ["WebGPU",                 () => has(navigator, "gpu")],
+    ["WebAssembly",            () => has(window, "WebAssembly")],
+    ["SVG",                    () => !!document.createElementNS && !!document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGRect],
+    ["Web Audio API",          () => has(window, "AudioContext") || has(window, "webkitAudioContext")],
+    ["MediaDevices",           () => has(navigator, "mediaDevices")],
+    ["WebRTC",                 () => has(window, "RTCPeerConnection")],
+    ["MediaRecorder",          () => has(window, "MediaRecorder")],
+    ["Picture-in-Picture",     () => has(document, "pictureInPictureEnabled")],
+    ["Fullscreen API",         () => has(document, "fullscreenEnabled") || has(document, "webkitFullscreenEnabled")],
+    ["IntersectionObserver",   () => has(window, "IntersectionObserver")],
+    ["ResizeObserver",         () => has(window, "ResizeObserver")],
+    ["MutationObserver",       () => has(window, "MutationObserver")],
+    ["PerformanceObserver",    () => has(window, "PerformanceObserver")],
+    ["requestAnimationFrame",  () => has(window, "requestAnimationFrame")],
+    ["requestIdleCallback",    () => has(window, "requestIdleCallback")],
+    ["Custom Elements",        () => has(window, "customElements")],
+    ["Shadow DOM",             () => has(Element.prototype, "attachShadow")],
+    ["Templates <template>",   () => "content" in document.createElement("template")],
+    ["Dialog <dialog>",        () => typeof HTMLDialogElement !== "undefined" && has(HTMLDialogElement.prototype, "showModal")],
+    ["Popover API",            () => has(HTMLElement.prototype, "showPopover")],
+    ["Clipboard API",          () => has(navigator, "clipboard")],
+    ["Notifications",          () => has(window, "Notification")],
+    ["Geolocation",            () => has(navigator, "geolocation")],
+    ["Vibration",              () => has(navigator, "vibrate")],
+    ["Web Share",              () => has(navigator, "share")],
+    ["File API",               () => has(window, "File") && has(window, "FileReader")],
+    ["Drag & Drop",            () => "draggable" in document.createElement("div")],
+    ["Speech Synthesis",       () => has(window, "speechSynthesis")],
+    ["Speech Recognition",     () => has(window, "SpeechRecognition") || has(window, "webkitSpeechRecognition")],
+    ["Gamepad API",            () => has(navigator, "getGamepads")],
+    ["Battery Status",         () => has(navigator, "getBattery")],
+    ["Device Orientation",     () => has(window, "DeviceOrientationEvent")],
+    ["Wake Lock",              () => has(navigator, "wakeLock")],
+    ["Screen Orientation",     () => has(screen, "orientation")],
+    ["Bluetooth",              () => has(navigator, "bluetooth")],
+    ["USB",                    () => has(navigator, "usb")],
+    ["Serial",                 () => has(navigator, "serial")],
+    ["HID",                    () => has(navigator, "hid")],
+    ["NFC",                    () => has(window, "NDEFReader")],
+    ["Payment Request",        () => has(window, "PaymentRequest")],
+    ["Credential Mgmt.",       () => has(navigator, "credentials")],
+    ["File System Access",     () => has(window, "showOpenFilePicker")],
+    ["View Transitions JS",    () => has(document, "startViewTransition")],
+    ["crypto.getRandomValues", () => has(window, "crypto") && has(crypto, "getRandomValues")],
+    ["crypto.subtle",          () => has(window, "crypto") && has(crypto, "subtle")],
+    ["Visual Viewport",        () => has(window, "visualViewport")],
+    ["history.pushState",      () => has(history, "pushState")],
+    ["matchMedia",             () => has(window, "matchMedia")],
+    ["CSS.supports",           () => has(window, "CSS") && has(CSS, "supports")],
+    ["DOMParser",              () => has(window, "DOMParser")],
+    ["Intl",                   () => has(window, "Intl")],
+    ["Page Visibility",        () => "visibilityState" in document],
+    ["Permissions API",        () => has(navigator, "permissions")]
+  ];
+
+  const SUITES = [
+    { title: "CSS",        icon: "🎨", tests: CSS_TESTS },
+    { title: "JavaScript", icon: "⚡", tests: JS_TESTS  },
+    { title: "APIs Web",   icon: "🌐", tests: API_TESTS }
+  ];
+
+  /* =========================================================
+     DETECCIÓN DE ENTORNO
+     ========================================================= */
+
+  function detectBrowser() {
+    const list = [
+      [/Edg[A-Z]?\//,        "Microsoft Edge"],
+      [/OPR\/|Opera/,        "Opera"],
+      [/SamsungBrowser/,     "Samsung Internet"],
+      [/Firefox\/|FxiOS/,    "Firefox"],
+      [/CriOS/,              "Chrome (iOS)"],
+      [/Chromium\//,         "Chromium"],
+      [/Chrome\//,           "Google Chrome"],
+      [/Safari\//,           "Safari"]
+    ];
+    for (const [re, name] of list) if (re.test(UA)) return name;
+    return "Desconocido";
+  }
+
+  function detectVersion() {
+    const m = UA.match(/(Edg[A-Z]?|OPR|SamsungBrowser|Firefox|FxiOS|CriOS|Chrome|Chromium|Version)\/([\d.]+)/);
+    return m ? m[2].split(".").slice(0, 3).join(".") : "—";
+  }
+
+  function detectEngine() {
+    if (/Firefox\/|FxiOS/.test(UA)) return "Gecko";
+    if (/CriOS|FxiOS|EdgiOS/.test(UA)) return "WebKit";
+    if (/Edg\/|OPR\/|SamsungBrowser|Chrome\/|Chromium\//.test(UA)) return "Blink";
+    if (/AppleWebKit/.test(UA)) return "WebKit";
+    return "Desconocido";
+  }
+
+  function detectOS() {
+    if (/Windows NT 10/.test(UA)) return "Windows 10/11";
+    if (/Windows/.test(UA)) return "Windows";
+    if (/Android/.test(UA)) return "Android";
+    if (/iPhone|iPad|iPod/.test(UA)) return "iOS / iPadOS";
+    if (/CrOS/.test(UA)) return "ChromeOS";
+    if (/Mac OS X/.test(UA)) return "macOS";
+    if (/Linux/.test(UA)) return "Linux";
+    return navigator.platform || "—";
+  }
+
+  function buildEnv() {
+    const items = [];
+
+    items.push(["Navegador", detectBrowser() + " " + detectVersion()]);
+    items.push(["Motor", detectEngine()]);
+    items.push(["Sistema", detectOS()]);
+    items.push(["Dispositivo", /Mobi|Android|iPhone/.test(UA) ? "Móvil" : "Escritorio"]);
+
+    items.push(["Pantalla", screen.width + " × " + screen.height]);
+    items.push(["Densidad", (window.devicePixelRatio || 1).toFixed(2) + "×"]);
+    items.push(["Profundidad color", (screen.colorDepth || "—") + " bits"]);
+    items.push(["Ventana", window.innerWidth + " × " + window.innerHeight]);
+
+    items.push(["Núcleos CPU", navigator.hardwareConcurrency ? navigator.hardwareConcurrency : "—"]);
+    items.push(["Memoria", navigator.deviceMemory ? navigator.deviceMemory + " GB" : "no expuesto"]);
+    items.push(["Idioma", navigator.language || "—"]);
+    items.push(["Zona horaria", (function () {
+      try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "—"; }
+      catch (e) { return "—"; }
+    })()]);
+
+    items.push(["Tema preferido", window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "Oscuro" : "Claro"]);
+    items.push(["Puntos táctiles", navigator.maxTouchPoints != null ? navigator.maxTouchPoints : "—"]);
+    items.push(["Conexión", (navigator.connection && (navigator.connection.effectiveType || navigator.connection.type)) || "no expuesta"]);
+    items.push(["Modo", navigator.onLine ? "En línea" : "Sin conexión"]);
+
+    return items;
+  }
+
+  /* =========================================================
+     EJECUCIÓN DE TESTS
+     ========================================================= */
+
+  function runAll() {
+    const out = [];
+    SUITES.forEach(suite => {
+      suite.tests.forEach(pair => {
+        const name = pair[0], fn = pair[1];
+        let ok = false, err = "";
+        try { ok = !!fn(); }
+        catch (e) { ok = false; err = (e && e.message) || String(e); }
+        out.push({ suite: suite.title, name: name, ok: ok, err: err });
+      });
+    });
+    return out;
+  }
+
+  /* =========================================================
+     RENDER
+     ========================================================= */
+
+  const $  = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+
+  let lastResults = [];
+
+  function render(results) {
+    const container = $("#results");
+    container.innerHTML = "";
+    let index = 0;
+
+    SUITES.forEach(suite => {
+      const rows = results.filter(r => r.suite === suite.title);
+      const passed = rows.filter(r => r.ok).length;
+
+      const section = document.createElement("section");
+      section.className = "suite";
+
+      const head = document.createElement("header");
+      head.className = "suite-head";
+      head.innerHTML =
+        '<h2><span class="suite-icon">' + suite.icon + "</span>" + suite.title + "</h2>" +
+        '<span class="suite-count">' + passed + " / " + rows.length + "</span>";
+      section.appendChild(head);
+
+      const grid = document.createElement("div");
+      grid.className = "grid";
+
+      rows.forEach(r => {
+        const el = document.createElement("div");
+        el.className = "test " + (r.ok ? "pass" : "fail");
+        el.style.setProperty("--i", index++);
+        el.title = r.ok
+          ? r.name + " · soportado"
+          : r.name + " · no soportado" + (r.err ? " (" + r.err + ")" : "");
+
+        const dot = document.createElement("span");
+        dot.className = "dot";
+
+        const nm = document.createElement("span");
+        nm.className = "name";
+        nm.textContent = r.name;
+
+        el.appendChild(dot);
+        el.appendChild(nm);
+        grid.appendChild(el);
+      });
+
+      section.appendChild(grid);
+      container.appendChild(section);
+    });
+  }
+
+  function updateScore(results) {
+    const total  = results.length;
+    const passed = results.filter(r => r.ok).length;
+    const pct    = total ? Math.round((passed / total) * 100) : 0;
+
+    const ring = $("#ring");
+    ring.style.setProperty("--p", pct);
+    $("#scoreNum").textContent = pct + "%";
+
+    $("#scoreMeta").innerHTML =
+      "<b>" + passed + "</b> de <b>" + total + "</b> características soportadas<br>" +
+      '<span class="ok-n">' + passed + " ✓</span> &nbsp;·&nbsp; " +
+      '<span class="fail-n">' + (total - passed) + " ✗</span>";
+  }
+
+  function updateStamp() {
+    $("#stamp").textContent = "Ejecutado el " + new Date().toLocaleString("es-ES");
+  }
+
+  function renderEnv() {
+    const box = $("#env");
+    box.innerHTML = "";
+    buildEnv().forEach(pair => {
+      const card = document.createElement("div");
+      card.className = "env-card";
+
+      const k = document.createElement("div");
+      k.className = "k";
+      k.textContent = pair[0];
+
+      const v = document.createElement("div");
+      v.className = "v";
+      v.textContent = pair[1];
+
+      card.appendChild(k);
+      card.appendChild(v);
+      box.appendChild(card);
+    });
+  }
+
+  /* =========================================================
+     FILTROS
+     ========================================================= */
+
+  let currentFilter = "all";
+
+  function applyFilter(f) {
+    currentFilter = f;
+    $$(".suite").forEach(section => {
+      let visible = 0;
+      $$(".test", section).forEach(t => {
+        const isPass = t.classList.contains("pass");
+        const show = f === "all" || (f === "pass" && isPass) || (f === "fail" && !isPass);
+        t.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+      section.style.display = visible ? "" : "none";
+    });
+  }
+
+  /* =========================================================
+     INFORME
+     ========================================================= */
+
+  function buildReport() {
+    const passed = lastResults.filter(r => r.ok).length;
+    const total  = lastResults.length;
+    const lines = [];
+
+    lines.push("BROWSER TEST — " + new Date().toLocaleString("es-ES"));
+    lines.push("Navegador : " + detectBrowser() + " " + detectVersion() + "  (" + detectEngine() + ")");
+    lines.push("Sistema   : " + detectOS());
+    lines.push("Pantalla  : " + screen.width + "x" + screen.height + " @" + (window.devicePixelRatio || 1) + "x");
+    lines.push("Resultado : " + passed + "/" + total + "  (" + Math.round(passed / total * 100) + "%)");
+    lines.push("");
+
+    SUITES.forEach(suite => {
+      const rows = lastResults.filter(r => r.suite === suite.title);
+      lines.push("== " + suite.title + " ==");
+      rows.forEach(r => lines.push("  " + (r.ok ? "[✓]" : "[✗]") + " " + r.name));
+      lines.push("");
+    });
+
+    lines.push("No soportadas:");
+    const fails = lastResults.filter(r => !r.ok);
+    if (!fails.length) lines.push("  (ninguna)");
+    else fails.forEach(r => lines.push("  · " + r.suite + " → " + r.name));
+
+    return lines.join("\n");
+  }
+
+  function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  async function copyReport() {
+    const text = buildReport();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        toast("Informe copiado al portapapeles");
+        return;
+      }
+      throw new Error("sin clipboard");
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast("Informe copiado"); }
+      catch (err) { toast("No se pudo copiar"); }
+      ta.remove();
+    }
+  }
+
+  /* =========================================================
+     ARRANQUE
+     ========================================================= */
+
+  function execute() {
+    lastResults = runAll();
+    render(lastResults);
+    updateScore(lastResults);
+    applyFilter(currentFilter);
+    updateStamp();
+  }
+
+  function init() {
+    renderEnv();
+    execute();
+
+    $$(".filter").forEach(btn => {
+      btn.addEventListener("click", () => {
+        $$(".filter").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        applyFilter(btn.dataset.filter);
+      });
+    });
+
+    $("#rerun").addEventListener("click", () => {
+      execute();
+      toast("Pruebas re-ejecutadas");
+    });
+
+    $("#copy").addEventListener("click", copyReport);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
